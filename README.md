@@ -65,8 +65,13 @@ make...
 ## 實驗結果
 
 ## PR 程序
+1. fork
+2. clone自己的fork repo
+3. 開始胡搞瞎搞 => commit => push上自己的fork repo
+4. 發Pull Request 給原repo
+5. 原repo管理者(ian60509)同意，處理conflict merge
 
-### 跟上原repo進度
+### 取得最新的「原repo」進度
 ```
 git remote -v
 ```

@@ -78,7 +78,7 @@ git remote -v
 
 將原repo設定為upstream 節點
 ```
-git remote add upstream https://github.com/ian60509/PP_Final_Bellman-Ford/edit/main/README.md
+git remote add upstream https://github.com/ian60509/PP_Final_Bellman-Ford.git
 git remote -v
 ```
 

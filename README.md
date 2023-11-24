@@ -62,6 +62,24 @@ make...
 ```
 ./example -a ....
 ```
-
 ## 實驗結果
+
+## PR 程序
+
+### 跟上原repo進度
+```
+git remote -v
+```
+
+將原repo設定為upstream 節點
+```
+git remote add upstream https://github.com/ian60509/PP_Final_Bellman-Ford/edit/main/README.md
+git remote -v
+```
+
+```
+git fetch upstream
+git merge upstream/master
+
+```
 

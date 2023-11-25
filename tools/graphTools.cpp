@@ -24,14 +24,18 @@ void print_help(const char* binary_name) {
     std::cerr << "Valid cmds are:\n\n"
               << CMD_TEXT2BIN << ": text file to binary file conversion, argument \n \
                 \t1. input text file  \n \
-                \t2. output binary file  \n"
+                \t2. output binary file  \n\
+                \t example: ./graphTools text2bin ./example.graph ./example.binary \n"
               << CMD_INFO << ": print graph metadata, argument:\n \
-                /t1. \"binary\" file \n"
-              << CMD_PRINT << ": print graph topology (careful with big graphs) argument:\n \"
-                /t1. \"binary\" file \n"
-              << CMD_NOOUTEDGES << ": detect vertices with no outgoing edges\n"
-              << CMD_NOINEDGES << ": detect vertices with no incoming edges\n"
-              << CMD_EDGESTATS << ": print stats on graph edges: e.g., min/max edges per node, etc.\n";
+                \t1. \"binary\" file \n"
+              << CMD_PRINT << ": print graph topology (careful with big graphs) argument:\n \
+                \t1. \"binary\" file \n"
+              << CMD_NOOUTEDGES << ": detect vertices with no outgoing edges\n\
+                \t1. \"binary\" file \n"
+              << CMD_NOINEDGES << ": detect vertices with no incoming edges\n\
+                \t1. \"binary\" file \n"
+              << CMD_EDGESTATS << ": print stats on graph edges: e.g., min/max edges per node, etc.\n\
+                \t1. \"binary\" file \n";
 }
 
 int main(int argc, char** argv) {
@@ -58,8 +62,10 @@ int main(int argc, char** argv) {
         std::cout << "Loading graph: " << inputFilename << "\n";
         g = load_graph(inputFilename.c_str());
 
-        std::cout << "Print  graph: " << inputFilename << "\n";
+        std::cout << "Your input  graph is: " << inputFilename << "\n";
         print_graph(g);
+
+        
         std::cout << "Done loading.\n";
         store_graph_binary(outputFilename.c_str(), g);
         free_graph(g);

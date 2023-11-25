@@ -9,6 +9,13 @@
 
 #define GRAPH_HEADER_TOKEN ((int) 0xDEADBEEF)
 
+//顏色處理
+#define NC "\e[0m"
+#define RED "\e[0;31m"
+#define GRN "\e[0;32m"
+#define CYN "\e[0;36m"
+#define REDB "\e[41m"
+
 
 void free_graph(Graph graph)
 {
@@ -128,7 +135,7 @@ void build_incoming_edges(graph* graph) {
     free(node_scatter);
 }
 
-void get_meta_data(std::ifstream& file, graph* graph)
+void get_meta_data(std::ifstream& file, graph* graph) //從file中讀取metadata，並且在graoh寫入這些metadata
 {
   // going back to the beginning of the file
   file.clear();
@@ -186,7 +193,8 @@ void read_graph_file(std::ifstream& file, int* scratch)
 void print_graph(const graph* graph)
 {
 
-    printf("Graph pretty print:\n");
+    printf(RED "ERROR" NC ": provide argument as follows -> ./program argument\n");
+    printf(CYN "Your graph:\n" NC);
     printf("num_nodes=%d\n", graph->num_nodes);
     printf("num_edges=%d\n", graph->num_edges);
 
@@ -210,6 +218,7 @@ void print_graph(const graph* graph)
         }
         printf("\n");
     }
+    printf(CYN "--------------------------------\n" NC);
 }
 
 Graph load_graph(const char* filename)

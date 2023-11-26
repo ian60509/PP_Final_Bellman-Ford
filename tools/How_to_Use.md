@@ -10,7 +10,8 @@
 
 #### 執行
 ```
-./produce_text 
+./produce_text //會使用預設檔名 default.graph
+./produce_text "檔名"
 ```
 
 

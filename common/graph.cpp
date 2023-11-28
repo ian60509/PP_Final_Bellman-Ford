@@ -144,7 +144,7 @@ void get_meta_data(std::ifstream& file, graph* graph) //從file中讀取metadata
   std::getline(file, buffer);
   if ((buffer.compare(std::string("AdjacencyGraph"))))
   {
-    std::cout << "Invalid input file" << buffer << std::endl;
+    std::cout << "Invalid input file: " << buffer << std::endl;
     exit(1);
   }
   buffer.clear();
@@ -193,7 +193,6 @@ void read_graph_file(std::ifstream& file, int* scratch)
 void print_graph(const graph* graph)
 {
 
-    printf(RED "ERROR" NC ": provide argument as follows -> ./program argument\n");
     printf(CYN "Your graph:\n" NC);
     printf("num_nodes=%d\n", graph->num_nodes);
     printf("num_edges=%d\n", graph->num_edges);

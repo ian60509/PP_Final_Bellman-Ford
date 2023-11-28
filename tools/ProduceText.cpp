@@ -159,7 +159,7 @@ int main(int argc, char** argv){
         exit(1); // EXIT_FAILURE
     }
 
-    ofs << "AdjacencyGraph " <<  "\n";
+    ofs << "AdjacencyGraph" <<  "\n";
     //get number of vertices
     int num_v = default_num_v;
     printf(GRN "Please input number of vertices you want\n " NC);

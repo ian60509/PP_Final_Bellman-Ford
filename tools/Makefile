@@ -9,3 +9,6 @@ PT:
 clean:
 	rm -rf pr *~ *.*~ ${GRAPH_TOOLS_NAME}
 	rm -r ${PRODUCE_TEXT}
+
+test:
+	make -C ../src/Serial

@@ -26,7 +26,7 @@
 
 "info" : 輸出基本的Metadata，點、邊的數量
 
-"print" : 輸出圖上每個點的incoming, outgoing edge
+"print" : 輸出圖上每個點的incoming, outgoing edge 超級好用
 
 "noout": 列出所有沒有outgoing edge 的點
 

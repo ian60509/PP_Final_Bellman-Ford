@@ -1,4 +1,4 @@
-#include <limits.h>
+#include <climits>
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,7 +93,7 @@ void init_cost(int **arr, Graph g, int r, int c){
                 
                 int outgoing_vertex = g->outgoing_edges[start_edge];
                 int rand = generateRandomPositiveInteger(1, 15);
-                if(outgoing_vertex == node ){
+                if(outgoing_vertex == node){
                     if(start_edge++ < end_edge)
                         arr[i][node] = rand;
                 }else{
@@ -108,8 +108,11 @@ void init_cost(int **arr, Graph g, int r, int c){
 }
 
 int main(int argc, char** argv){
+    if(argc < 2){
+        std::cerr << "Usage: " << argv[0] << " <graph>" << std::endl;
+        return 1;
+    }
     std::string graph_filename = argv[1];
-    std::cout << argv[1] << std::endl;
     Graph g;
     if (USE_BINARY_GRAPH) {
         g = load_graph_binary(graph_filename.c_str());

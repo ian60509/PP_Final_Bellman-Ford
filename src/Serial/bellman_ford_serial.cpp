@@ -5,13 +5,13 @@
 #include <string>
 #include <omp.h>
 #include <iostream>
-
+#include <chrono>
 #include "../../common/graph.h"
 
 using namespace std;
 
 #define USE_BINARY_GRAPH 1
-
+#define INFINITY 1000000
 struct solution{
     int *distances;
 };
@@ -39,37 +39,52 @@ int** init_array_2(int **arr, int r, int c){
     }
     return arr;
 }
-void bellman_ford_serial(Graph g, int starter, solution *sol, int **cost){
+
+void free_array_2(int **arr, int r) {
+    for (int i = 0; i < r; i++) {
+        free(arr[i]);
+    }
+    free(arr);
+}
+
+void bellman_ford_serial(Graph g, int starter, solution *sol, int *cost){
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     int num_nodes = g->num_nodes;
     int num_edges = g->num_edges;
     sol->distances = init_array_1(sol->distances , num_nodes);
     int *distances = sol->distances;
 
     for(int i = 0; i < num_nodes; i++){
-        distances[i] = cost[starter][i];
-        // printf("distances[%d] = %d \n", i, distances[i]);
+        distances[i] = INFINITY;
     }
 
+    int starter_out_edge_begin = g->outgoing_starts[0];
+    int starter_out_edge_end = g->outgoing_starts[1];
+    for(int edge = starter_out_edge_begin; edge < starter_out_edge_end; edge++){
+        distances[g->outgoing_edges[edge]] = cost[edge];
+    }
     distances[starter] = 0;
 
-    for(int i = 1; i < num_nodes - 1; i++){
-        for(int node = 0; node < num_nodes; node++){
-            int start_edge = g->outgoing_starts[node];
-            int end_edge = (node == g->num_nodes - 1)
-                            ? g->num_edges
-                            : g->outgoing_starts[node + 1];
-            for(int edge_num = start_edge; edge_num < end_edge; edge_num++){
-                Vertex outgoing_vertex = g->outgoing_edges[edge_num];
-                
-                if(distances[node] > distances[outgoing_vertex] + cost[outgoing_vertex][node]){
-                    // printf("distances[%d] = %d, outgoing_vertex的distances[%d] = %d, cost[%d][%d] = %d\n", 
-                    //     node, distances[node], outgoing_vertex, distances[outgoing_vertex], outgoing_vertex, node, cost[outgoing_vertex][node]);
-
-                    distances[node] = distances[outgoing_vertex] + cost[outgoing_vertex][node];
-                }
+    for(int node = 1; node < num_nodes; node++){
+        int start_edge = g->outgoing_starts[node];
+        int end_edge = (node == g->num_nodes - 1)
+                        ? g->num_edges
+                        : g->outgoing_starts[node + 1];
+        for(int edge_num = start_edge; edge_num < end_edge; edge_num++){
+            Vertex outgoing_vertex = g->outgoing_edges[edge_num];
+            if(distances[outgoing_vertex] == INFINITY && distances[node] == INFINITY)
+                continue;
+            if(distances[node] + cost[edge_num] < distances[outgoing_vertex] ){
+                distances[outgoing_vertex] = distances[node] + cost[edge_num];
             }
         }
     }
+        
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    cout << "Bellman Ford Serial: " << duration.count() << " microseconds" << endl;
+
 }
 
 
@@ -78,32 +93,11 @@ int generateRandomPositiveInteger(int min, int max) {
     return (rand() % (max - min + 1)) + min;
 }
 
-void init_cost(int **arr, Graph g, int r, int c){
-    //初始化陣列的值
+void init_cost_1(int *arr, int n){
     srand(time(NULL));
-    for(int i = 0; i < r; i++){
-        int start_edge = g->outgoing_starts[i];
-        int end_edge = (i == g->num_nodes - 1)
-                        ? g->num_edges
-                        : g->outgoing_starts[i + 1];
-        for(int node = 0; node < c; node++){
-            if(i == node)
-                arr[i][node] = 0;
-            else{
-                
-                int outgoing_vertex = g->outgoing_edges[start_edge];
-                int rand = generateRandomPositiveInteger(1, 15);
-                if(outgoing_vertex == node){
-                    if(start_edge++ < end_edge)
-                        arr[i][node] = rand;
-                }else{
-                    //暫時以100000代表無限大
-                    arr[i][node] = 100000;
-                }
-
-            }
-                
-        }
+    for(int i = 0; i < n; i++){
+        int rand = generateRandomPositiveInteger(1, 15);
+        arr[i] = rand;
     }
 }
 
@@ -128,17 +122,15 @@ int main(int argc, char** argv){
     printf("  Edges: %d\n", g->num_edges);
     printf("  Nodes: %d\n", g->num_nodes);
     
-    int **cost;
-    cost = init_array_2(cost, g->num_nodes, g->num_nodes);
-
-    init_cost(cost, g, g->num_nodes, g->num_nodes);
-    // print_arr_2(cost, g->num_nodes, g->num_nodes);
+    //cost改成一維
+    int *cost;
+    cost = init_array_1(cost, g->num_edges);
+    init_cost_1(cost, g->num_edges);
 
     solution sol;
     
-    // bellman_ford_serial(g, &sol, cost);
     bellman_ford_serial(g, 0, &sol, cost);
-    cout << "---------sol.dis-----------\n";
-    print_arr_1(sol.distances, g->num_nodes);
+    free(cost);
+
     return 0;
 }

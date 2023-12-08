@@ -15,14 +15,14 @@ PP工作站....
 ## Serial-part
 編譯:
 ```
-cd...
+cd /src/Serial
 make clean
-make...
+make
 ```
 
 執行:
 ```
-./example -a ....
+./serial.out  {graph路徑}
 ```
 
 ## MPI-part

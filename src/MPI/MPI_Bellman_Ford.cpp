@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     int *cost ;
     solution local_sol;
     
-    if(my_rank==0){ //master
+    if(my_rank==0){ //master load file
         // printf("argc=%d\n", argc);
         if(argc < 2){
             std::cerr << "Please Use This Format: " << argv[0] << " <graph>" << std::endl;
@@ -88,13 +88,11 @@ int main(int argc, char** argv) {
     MPI_Bcast( g->incoming_edges , g->num_edges , MPI_INT , 0 , MPI_COMM_WORLD);
 
     //print graph
-    // if(my_rank == 0) print_graph_contain_costs(g, cost);
+    if(my_rank == 0) print_graph_contain_costs(g, cost);
 
     printf("start Bellman-Ford\n");
     bellman_ford_MPI(g, 0, &local_sol, cost);
-    // printf("I'm %d-th processors, local solution is....\n", my_rank);
-    // print_arr_1D(local_sol.distances, g->num_nodes);
-    MPI_Barrier( MPI_COMM_WORLD);
+    
 
     
     solution final_solution;
@@ -128,8 +126,9 @@ void bellman_ford_MPI(const Graph g, const int starter, solution *sol, const int
 
     //comput my range
     int stride = (g->num_nodes)/ world_size;
-    int start_node = (my_rank) * stride;
-    int end_node = (my_rank==world_size)? num_nodes: (my_rank+1)*stride -1;
+    int start_node =(my_rank)*stride;
+    int end_node = (my_rank+1)*stride -1;
+    //  printf("%d-th start=%d, end=%d\n", my_rank, start_node, end_node);
 
     //initial distances
     for(int i = 0; i < num_nodes; i++){
@@ -145,7 +144,7 @@ void bellman_ford_MPI(const Graph g, const int starter, solution *sol, const int
 
 
     //--------------- Bellman-Ford start  -----------------------
-    for(int node = start_node; node < end_node; node++){
+    for(int node = start_node; node <= end_node; node++){
         int start_edge = g->outgoing_starts[node];
         int end_edge = (node == g->num_nodes - 1)
                         ? g->num_edges
@@ -158,19 +157,13 @@ void bellman_ford_MPI(const Graph g, const int starter, solution *sol, const int
                 distances[outgoing_vertex] = distances[node] + cost[edge_num];
             }
         }
-        if(my_rank==0) {
-            printf("Before------------calculate %d-node\n", node);
-            print_arr_1D(distances, g->num_nodes);
-        }
-        // printf("%d-processor call Allreduce\n", my_rank);
+        
         MPI_Allreduce(distances, current_sol.distances, g->num_nodes, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
-        // distances = current_sol.distances;
         memcpy(distances, current_sol.distances, g->num_nodes);
-        if(my_rank==0) {
-            printf("After Allreduce------------\n");
-            print_arr_1D(distances, g->num_nodes);
+        if(my_rank==world_size-1){
+            printf("%d-th processor, distances arr...\n", my_rank);
+            print_arr_1D(distances,  g->num_nodes);
         }
-
     }
     return ;
 }

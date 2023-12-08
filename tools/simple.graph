@@ -1,0 +1,12 @@
+AdjacencyGraph
+# num vertices
+4
+# num edges
+5
+# edge starts
+0 2 3 4 
+# all the outgoing edges (target vertex)
+1 2
+3
+3
+0

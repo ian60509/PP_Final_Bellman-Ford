@@ -50,7 +50,7 @@ void build_edges(graph* graph, int* scratch)
 
 // Given an outgoing edge adjacency list representation for a directed
 // graph, build an incoming adjacency list representation
-void build_incoming_edges(graph* graph) {
+void build_incoming_edges_undirected(graph* graph) {
 
     //printf("Beginning build_incoming... (%d nodes)\n", graph->num_nodes);
 
@@ -135,6 +135,13 @@ void build_incoming_edges(graph* graph) {
     free(node_scatter);
 }
 
+    
+
+
+void build_edge_cost(graph* g){
+
+}
+
 void get_meta_data(std::ifstream& file, graph* graph) //從file中讀取metadata，並且在graoh寫入這些metadata
 {
   // going back to the beginning of the file
@@ -177,6 +184,7 @@ void read_graph_file(std::ifstream& file, int* scratch)
         continue;
 
     std::stringstream parse(buffer);
+    // Read the part of info in the   '#.......' clause
     while (!parse.fail()) {
         int v;
         parse >> v;
@@ -185,6 +193,7 @@ void read_graph_file(std::ifstream& file, int* scratch)
             break;
         }
         scratch[idx] = v;
+        printf("scratch[%d] = %d\n", idx, scratch[idx]);
         idx++;
     }
   }
@@ -229,16 +238,21 @@ Graph load_graph(const char* filename)
   graph_file.open(filename);
   get_meta_data(graph_file, graph);
 
-  int* scratch = (int*) malloc(sizeof(int) * (graph->num_nodes + graph->num_edges));
+  // 3*graph->num_edges, because of the 
+  // 1. outgoing edges
+  // 2. incoming edges
+  // 3. outgoing edges costs
+  // 4. incoming edges costs
+  int* scratch = (int*) malloc(sizeof(int) * (graph->num_nodes + 4*graph->num_edges));
   read_graph_file(graph_file, scratch);
 
   build_start(graph, scratch);
   build_edges(graph, scratch);
   free(scratch);
 
-  build_incoming_edges(graph);
-
-  //print_graph(graph);
+  build_incoming_edges_undirected(graph);
+    build_edge_cost(graph);
+  
 
   return graph;
 }
@@ -284,7 +298,7 @@ Graph load_graph_binary(const char* filename)
 
     fclose(input);
 
-    build_incoming_edges(graph);
+    build_incoming_edges_undirected(graph);
     //print_graph(graph);
     return graph;
 }

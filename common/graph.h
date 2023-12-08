@@ -18,6 +18,8 @@ struct graph
 
     int* incoming_starts;
     Vertex* incoming_edges;
+
+    int** edge_cost; //一個紀錄edge cost陣列的指標，兩個方向cost 不同
 };
 
 using Graph = graph*;

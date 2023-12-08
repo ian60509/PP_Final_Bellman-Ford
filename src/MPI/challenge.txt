@@ -1,0 +1,19 @@
+
+
+## 不知道為甚麼 reduce 的explicit barrier 似乎沒有效果，processor 1 在 processors 0 都呼叫reduce之後才開始計算
+312555022@pp6:~/PP_Final_Bellman-Ford/src/MPI$ ./run.sh 
+./run.sh: line 1: GRAPH: command not found
+rm -f *.o
+rm -f MPI_BF
+mpicxx MPI_Bellman_Ford.cpp ../../common/graph.cpp -o MPI_BF
+-------------------start running---------------
+No protocol specified
+start Bellman-Ford
+I'm 0-th processors, final solution is....
+arr[0] = 0
+arr[1] = 11
+arr[2] = 6
+arr[3] = 12
+start Bellman-Ford
+
+## 要呼叫 all reduce 讓各個processor獲得新資料

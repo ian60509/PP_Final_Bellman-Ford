@@ -67,10 +67,6 @@ void bellman_ford_serial(Graph g, int starter, solution *sol, int *cost){
     distances[starter] = 0;
 
     for(int node = 1; node < num_nodes; node++){
-        int start_edge = g->outgoing_starts[node];
-        int end_edge = (node == g->num_nodes - 1)
-                        ? g->num_edges
-                        : g->outgoing_starts[node + 1];
         for(int edge_num = start_edge; edge_num < end_edge; edge_num++){
             Vertex outgoing_vertex = g->outgoing_edges[edge_num];
             if(distances[outgoing_vertex] == INFINITY && distances[node] == INFINITY)

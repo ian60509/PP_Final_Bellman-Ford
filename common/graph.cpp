@@ -3,11 +3,15 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <stdlib.h>
 
 #include "graph.h"
 #include "graph_internal.h"
 
 #define GRAPH_HEADER_TOKEN ((int) 0xDEADBEEF)
+#define COST_MIN  0
+#define COST_MAX  15
+#define DISTANCE_INFINITY 1000000
 
 //顏色處理
 #define NC "\e[0m"
@@ -138,8 +142,25 @@ void build_incoming_edges_undirected(graph* graph) {
     
 
 
-void build_edge_cost(graph* g){
+void build_edge_cost(graph* g, int min, int max){
+    // I use fixed random seed to get the fixed cost generation
+    srand(5);
+    // if want to generate variaty cost, you can uncomment following line
+    // srand(time(NULL));
 
+    //start assign cost
+    g->edge_cost = (int*)malloc(sizeof(int)*g->num_edges);
+    for(int i = 0; i<g->num_edges; i++){
+        g->edge_cost[i] = (rand() % (max - min + 1)) + min ;
+    }
+}
+void set_distances_value(graph* g, int value){
+    assert(g->distances!=nullptr);
+    std::fill(g->distances, g->distances+g->num_nodes, value);
+}
+void init_distances_value(graph* g){
+    g->distances = (int*)malloc(sizeof(int)*g->num_nodes);
+    set_distances_value(g, DISTANCE_INFINITY);
 }
 
 void get_meta_data(std::ifstream& file, graph* graph) //從file中讀取metadata，並且在graoh寫入這些metadata
@@ -203,17 +224,23 @@ void print_graph(const graph* graph)
 {
 
     printf(CYN "Your graph:\n" NC);
-    printf("num_nodes=%d\n", graph->num_nodes);
-    printf("num_edges=%d\n", graph->num_edges);
-
+    printf(GRN "num_nodes=%d\n" NC, graph->num_nodes);
+    printf(GRN "num_edges=%d\n\n" NC, graph->num_edges);
+  
+    
     for (int i=0; i<graph->num_nodes; i++) {
 
         int start_edge = graph->outgoing_starts[i];
         int end_edge = (i == graph->num_nodes-1) ? graph->num_edges : graph->outgoing_starts[i+1];
-        printf("node %02d: out=%d: ", i, end_edge - start_edge);
+        printf("node %02d: outgoing number=%d, target node(cost): ", i, end_edge - start_edge);
         for (int j=start_edge; j<end_edge; j++) {
             int target = graph->outgoing_edges[j];
-            printf("%d ", target);
+            if(graph->edge_cost == nullptr){ //not allocate edge cost yet
+                printf("%d() ", target);
+            }else{
+                printf("%d(%d) ", target, graph->edge_cost[j]);
+            }
+            
         }
         printf("\n");
 
@@ -227,6 +254,8 @@ void print_graph(const graph* graph)
         printf("\n");
     }
     printf(CYN "--------------------------------\n" NC);
+    
+    
 }
 
 Graph load_graph(const char* filename)
@@ -251,7 +280,7 @@ Graph load_graph(const char* filename)
   free(scratch);
 
   build_incoming_edges_undirected(graph);
-    build_edge_cost(graph);
+  build_edge_cost(graph, COST_MIN, COST_MAX);
   
 
   return graph;
@@ -299,6 +328,8 @@ Graph load_graph_binary(const char* filename)
     fclose(input);
 
     build_incoming_edges_undirected(graph);
+    build_edge_cost(graph, COST_MIN, COST_MAX); // we assign each edge a random cost value
+    init_distances_value(graph);
     //print_graph(graph);
     return graph;
 }
@@ -333,4 +364,17 @@ void store_graph_binary(const char* filename, Graph graph) {
     }
 
     fclose(output);
+}
+
+void print_distances(const graph* g, std::string message){
+    assert(g->distances != nullptr);
+
+    printf(RED"Show The Distances" NC);
+    printf(CYN );
+    std::cout<<message<<std::endl;
+    std::cout<<"starter="<<g->source<<std::endl;
+    printf(NC);
+    for(int i=0; i<g->num_nodes; i++){
+        printf("distance[%d] = %d\n", i, g->distances[i]);
+    }
 }

@@ -19,7 +19,10 @@ struct graph
     int* incoming_starts;
     Vertex* incoming_edges;
 
-    int** edge_cost; //一個紀錄edge cost陣列的指標，兩個方向cost 不同
+    int* edge_cost; // cost 1D array, 1-1 mapping to outgoing edges
+    int* distances;
+    
+    int source;
 };
 
 using Graph = graph*;
@@ -43,7 +46,10 @@ Graph load_graph_binary(const char* filename);
 void store_graph_binary(const char* filename, Graph);
 
 void print_graph(const graph*);
+void print_distances(const graph*, std::string);
 
+/* Modify Graph*/
+void set_distances_value(graph* g, int value);
 
 /* Deallocation */
 void free_graph(Graph);

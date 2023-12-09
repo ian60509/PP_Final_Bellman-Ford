@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <string.h>
 #include <iostream>
 #include <chrono>
 #include "../../common/graph.h"
@@ -17,32 +18,23 @@
 #define REDB "\e[41m"
 
 using namespace std;
-
 #define USE_BINARY_GRAPH 1
-#define INFINITY 1000000
-struct solution{
-    int *distances;
-};
+#define DISTANCE_INFINITY 1000000
 
-void print_arr_1D(int *arr, int n);
-void print_arr_2D(int **arr, int r, int c);
-int* init_array_1D(int *arr, int n);
-int** init_array_2D(int **arr, int r, int c);
-void bellman_ford_MPI(const Graph g, const int starter, solution *sol, const int *cost);
-void bellman_ford_serial(Graph g, int starter, solution *sol, int *cost);
-int generateRandomPositiveInteger(int min, int max);
-void init_cost_1D(int *arr, int n);
-void print_graph_contain_costs(const graph *graph, int* cost);
+
+
+int bellman_ford_MPI(Graph);
 
 int main(int argc, char** argv) {
+    //-------------------- Init MPI --------------------
     MPI_Init(&argc, &argv);
     int my_rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+
     Graph g = (graph*) malloc(1*sizeof(graph));
-    int *cost ;
-    solution local_sol;
     
+    //------------- get input --------------------------
     if(my_rank==0){ //master load file
         // printf("argc=%d\n", argc);
         if(argc < 2){
@@ -53,7 +45,7 @@ int main(int argc, char** argv) {
 
         if (USE_BINARY_GRAPH) {
             g = load_graph_binary(graph_filename.c_str());
-        } else {
+        }else {
             g = load_graph(argv[1]);
             printf("storing binary form of graph!\n");
             store_graph_binary(graph_filename.append(".bin").c_str(), g);
@@ -61,175 +53,105 @@ int main(int argc, char** argv) {
             exit(1);
         }
 
-    }else{ //other
     }
     
     
+    // ------------------------  synchronize all graph member data------------------------------------------
     MPI_Bcast(&(g->num_nodes), 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&(g->num_edges), 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    if(my_rank != 0){
-        // bacause other processor they are not load graph => so need to allocate memory for g's member
-        g->outgoing_starts = (int*)malloc(g->num_nodes*sizeof(int));
-        g->outgoing_edges = (Vertex*)malloc(g->num_edges*sizeof(Vertex));
-
-        g->incoming_starts = (int*)malloc(g->num_nodes*sizeof(int));
-        g->incoming_edges = (Vertex*)malloc(g->num_edges*sizeof(Vertex));
+    //becasue the doesn't load graph, so have not allocate memory for g's member
+    if(my_rank!=0) {
+        printf("I'm %d-processor, allocacate memory....\n", my_rank);
+        allocate_graph_content(g);
     }
-
-    
-    //every processor init their cost array => they are same
-    cost = (int*)malloc(g->num_edges * sizeof(int));
-    init_cost_1D(cost, g->num_edges);
     // Broadcast the graph content
     MPI_Bcast( g->outgoing_starts , g->num_nodes , MPI_INT , 0 , MPI_COMM_WORLD);
     MPI_Bcast( g->outgoing_edges , g->num_edges , MPI_INT , 0 , MPI_COMM_WORLD);
     MPI_Bcast( g->incoming_starts , g->num_nodes , MPI_INT , 0 , MPI_COMM_WORLD);
     MPI_Bcast( g->incoming_edges , g->num_edges , MPI_INT , 0 , MPI_COMM_WORLD);
+    MPI_Bcast( g->edge_cost , g->num_edges , MPI_INT , 0 , MPI_COMM_WORLD);
+    MPI_Bcast( g->distances , g->num_nodes , MPI_INT , 0 , MPI_COMM_WORLD);
+    MPI_Bcast( &(g->source) , 1 , MPI_INT , 0 , MPI_COMM_WORLD);
 
     //print graph
-    if(my_rank == 0) print_graph_contain_costs(g, cost);
+    if(my_rank == 1) print_graph(g);
 
-    printf("start Bellman-Ford\n");
-    bellman_ford_MPI(g, 0, &local_sol, cost);
-    
-
-    
-    solution final_solution;
-    final_solution.distances  = init_array_1D(final_solution.distances , g->num_nodes);
-    MPI_Reduce( local_sol.distances , final_solution.distances , g->num_nodes , MPI_INT , MPI_MIN , 0 , MPI_COMM_WORLD);
-    
-
+    //---------------------  Start Bellman-Ford MPI---------------------------------------
+    auto start_time = std::chrono::high_resolution_clock::now();
+    bellman_ford_MPI(g);
+    auto end_time = std::chrono::high_resolution_clock::now();
+    //---------- check result--------------
     if(my_rank==0){
         printf("I'm %d-th processors, final solution is....\n", my_rank);
-        print_arr_1D(final_solution.distances, g->num_nodes);
+        print_distances(g, "");
     }
     
+    //-----------output execution time------------------
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    cout << "Bellman Ford MPI: " << duration.count() << " microseconds" << endl;
     // 完成 MPI
     MPI_Finalize();
 
     return 0;
 }
 
-void bellman_ford_MPI(const Graph g, const int starter, solution *sol, const int *cost){
-    
-    int my_rank, world_size;
+int bellman_ford_MPI(Graph g){
+    int my_rank, num_processors;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    const int num_nodes = g->num_nodes;
-    const int num_edges = g->num_edges;
-    sol->distances = init_array_1D(sol->distances , num_nodes);
-    int *distances = sol->distances;
-    solution current_sol;
-    current_sol.distances = init_array_1D(sol->distances , num_nodes);
-
-    //comput my range
-    int stride = (g->num_nodes)/ world_size;
-    int start_node =(my_rank)*stride;
-    int end_node = (my_rank+1)*stride -1;
-    //  printf("%d-th start=%d, end=%d\n", my_rank, start_node, end_node);
-
-    //initial distances
-    for(int i = 0; i < num_nodes; i++){
-        distances[i] = INFINITY;
+    MPI_Comm_size(MPI_COMM_WORLD, &num_processors);
+    if(g->num_nodes%num_processors!=0){
+        printf("num_nodes=%d is not the multiple of number of processors=%d, that will have deadlock in MPI ", g->num_nodes, num_processors);
+        exit(0);
     }
+    int stride = (g->num_nodes/num_processors);
+    int *cur_distances = (int*)malloc(sizeof(int)*g->num_nodes);
 
-    int starter_out_edge_begin = g->outgoing_starts[0];
-    int starter_out_edge_end = g->outgoing_starts[1]; 
-    for(int edge = starter_out_edge_begin; edge < starter_out_edge_end; edge++){ //set all start node all outgoing edge to their cost
-        distances[g->outgoing_edges[edge]] = cost[edge];
-    } 
-    distances[starter] = 0;
+    g->distances[g->source] = 0;
 
+    //--------------------------  Relax -----------------------------------
+    //Iterate |V|-1 times
+    for(int i=0; i<g->num_nodes-1; i++){
 
-    //--------------- Bellman-Ford start  -----------------------
-    for(int node = start_node; node <= end_node; node++){
-        int start_edge = g->outgoing_starts[node];
-        int end_edge = (node == g->num_nodes - 1)
-                        ? g->num_edges
-                        : g->outgoing_starts[node + 1];
-        for(int edge_num = start_edge; edge_num < end_edge; edge_num++){
-            Vertex outgoing_vertex = g->outgoing_edges[edge_num];
-            if(distances[outgoing_vertex] == INFINITY && distances[node] == INFINITY)
-                continue;
-            if(distances[node] + cost[edge_num] < distances[outgoing_vertex] ){
-                distances[outgoing_vertex] = distances[node] + cost[edge_num];
+        int start_v = my_rank*stride;
+        int end_v = (my_rank+1)*stride;
+
+        //Each processor is responsible for handling a subset of nodes
+        for(int v=start_v; v<end_v; v++){
+            int start_edge = g->outgoing_starts[v];
+            int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
+
+            //for each u, which is outgoing neighbor of v
+            for(int edge_idx = start_edge; edge_idx < end_edge; edge_idx++){
+                Vertex u = g->outgoing_edges[edge_idx];
+                if( g->distances[v] == DISTANCE_INFINITY) // v can't relax ant neighbor
+                    break;
+                if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
+                   g-> distances[u] = g->distances[v] + g->edge_cost[edge_idx];
+                }
             }
         }
-        
-        MPI_Allreduce(distances, current_sol.distances, g->num_nodes, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
-        memcpy(distances, current_sol.distances, g->num_nodes);
-        if(my_rank==world_size-1){
-            printf("%d-th processor, distances arr...\n", my_rank);
-            print_arr_1D(distances,  g->num_nodes);
+
+        // Reduce  partial result of each processor in this round
+
+        MPI_Allreduce(g->distances, cur_distances, g->num_nodes, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+        memcpy(g->distances, cur_distances, g->num_nodes*sizeof(int));
+    }
+    
+    //---------------------  Check Negative Cycle---------------------------
+    for(int v=0; v<g->num_nodes; v++){
+            int start_edge = g->outgoing_starts[v];
+            int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
+
+            //for each u, which is outgoing neighbor of v
+            for(int edge_idx = start_edge; edge_idx < end_edge; edge_idx++){
+                Vertex u = g->outgoing_edges[edge_idx];
+                if( g->distances[v] == DISTANCE_INFINITY) // v can't relax ant neighbor
+                    break;
+                if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
+                   return 1;
+                }
+            }
         }
-    }
-    return ;
+    return 0;
 }
-void print_arr_1D(int *arr, int n){
-    for(int i = 0; i < n; i++){
-        printf("arr[%d] = %d\n", i, arr[i]);
-    }
-}
-void print_arr_2D(int **arr, int r, int c){
-    for(int i = 0; i < r; i++){
-        for(int j = 0; j < c; j++){
-            printf("arr[%d][%d] = %d\n", i, j, arr[i][j]);
-        }
-    }
-}
-int* init_array_1D(int *arr, int n){
-    arr = (int*)malloc(n * sizeof(int));
-    return arr;
-}
-int** init_array_2D(int **arr, int r, int c){
-    //初始化二維陣列
-    arr = (int**)malloc(r * sizeof(int *));
-    for(int i = 0; i < r; i++){
-        arr[i] = (int *)malloc(c * sizeof(int));
-    }
-    return arr;
-}
-
-int generateRandomPositiveInteger(int min, int max) {
-    return (rand() % (max - min + 1)) + min;
-}
-
-void init_cost_1D(int *arr, int n){
-    srand(5);
-    // srand(time(NULL));
-    for(int i = 0; i < n; i++){
-        int rand = generateRandomPositiveInteger(1, 15);
-        arr[i] = rand;
-    }
-}
-void print_graph_contain_costs(const graph *graph, int* cost){
-    printf(CYN "Your graph:\n" NC);
-    printf("num_nodes=%d\n", graph->num_nodes);
-    printf("num_edges=%d\n", graph->num_edges);
-
-    for (int i=0; i<graph->num_nodes; i++) {
-
-        int start_edge = graph->outgoing_starts[i];
-        int end_edge = (i == graph->num_nodes-1) ? graph->num_edges : graph->outgoing_starts[i+1];
-        printf("node %02d:  out: ", i);
-        for (int j=start_edge; j<end_edge; j++) {
-            int target = graph->outgoing_edges[j];
-            int this_node_cost = cost[j];
-            printf("%d(%d) ", target, this_node_cost);
-        }
-        printf("\n");
-
-        start_edge = graph->incoming_starts[i];
-        end_edge = (i == graph->num_nodes-1) ? graph->num_edges : graph->incoming_starts[i+1];
-        printf("         in: ");
-        for (int j=start_edge; j<end_edge; j++) {
-            int target = graph->incoming_edges[j];
-            printf("%d ", target);
-        }
-        printf("\n");
-    }
-    printf(CYN "--------------------------------\n" NC);
-}
-

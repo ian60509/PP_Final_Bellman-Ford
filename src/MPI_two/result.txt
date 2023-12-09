@@ -1,0 +1,307 @@
+start Bellman-Ford
+I'm 1-processor, allocacate memory....
+start Bellman-Ford
+0-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+1-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+2-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+3-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+4-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+5-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+6-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+7-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+8-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+9-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+10-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+11-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+12-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+13-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+14-th round
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000
+I'm 0-th processors, final solution is....
+[0;31mShow The Distances[0m[0;36m
+starter=0
+[0mdistance[0] = 0
+distance[1] = 11
+distance[2] = 19
+distance[3] = 19
+distance[4] = 13
+distance[5] = 13
+distance[6] = 17
+distance[7] = 31
+distance[8] = 17
+distance[9] = 25
+distance[10] = 31
+distance[11] = 36
+distance[12] = 1000000
+distance[13] = 1000000
+distance[14] = 1000000
+distance[15] = 1000000

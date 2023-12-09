@@ -7,7 +7,7 @@ GRAPH=/home/chh/pp/test/grid4x4.graph
 all: default
 
 default: Serial.cc ../../common/graph.cpp
-	g++ -g -o Serial $^ 
+	g++  -o Serial $^ 
 
 run: default
 	make; ./Serial $(GRAPH)

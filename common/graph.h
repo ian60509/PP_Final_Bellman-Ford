@@ -13,14 +13,14 @@ struct graph
     // The node reached by vertex i's first outgoing edge is given by
     // outgoing_edges[outgoing_starts[i]].  To iterate over all
     // outgoing edges, please see the top-down bfs implementation.
-    int* outgoing_starts;
-    Vertex* outgoing_edges;
+    int* outgoing_starts;                // |V| member
+    Vertex* outgoing_edges;              //|E| member
 
-    int* incoming_starts;
-    Vertex* incoming_edges;
+    int* incoming_starts;                // |V| member
+    Vertex* incoming_edges;              //|E| member
 
     int* edge_cost; // cost 1D array, 1-1 mapping to outgoing edges
-    int* distances;
+    int* distances;                      // |V| member
     
     int source;
 };
@@ -49,6 +49,7 @@ void print_graph(const graph*);
 void print_distances(const graph*, std::string);
 
 /* Modify Graph*/
+void allocate_graph_content(graph* g);
 void set_distances_value(graph* g, int value);
 
 /* Deallocation */

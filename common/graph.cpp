@@ -162,6 +162,24 @@ void init_distances_value(graph* g){
     g->distances = (int*)malloc(sizeof(int)*g->num_nodes);
     set_distances_value(g, DISTANCE_INFINITY);
 }
+void allocate_graph_content(graph* g){
+    
+
+    // The node reached by vertex i's first outgoing edge is given by
+    // outgoing_edges[outgoing_starts[i]].  To iterate over all
+    // outgoing edges, please see the top-down bfs implementation.
+    g->outgoing_starts = (int*)malloc(sizeof(int)*g->num_nodes);                // |V| member
+    g->outgoing_edges = (Vertex*)malloc(sizeof(Vertex)*g->num_edges);              //|E| member
+
+    g->incoming_starts = (int*)malloc(sizeof(int)*g->num_nodes); ;                // |V| member
+    g->incoming_edges = (Vertex*)malloc(sizeof(Vertex)*g->num_edges);              //|E| member
+
+    g->edge_cost = (int*)malloc(sizeof(int)*g->num_edges); // cost 1D array, 1-1 mapping to outgoing edges
+    g->distances = (int*)malloc(sizeof(int)*g->num_nodes);                      // |V| member
+    
+    int source = 0;
+}
+
 
 void get_meta_data(std::ifstream& file, graph* graph) //從file中讀取metadata，並且在graoh寫入這些metadata
 {
@@ -330,6 +348,7 @@ Graph load_graph_binary(const char* filename)
     build_incoming_edges_undirected(graph);
     build_edge_cost(graph, COST_MIN, COST_MAX); // we assign each edge a random cost value
     init_distances_value(graph);
+    graph ->source = 0;
     //print_graph(graph);
     return graph;
 }

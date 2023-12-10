@@ -1,4 +1,4 @@
-GRAPH = /home/gpl/Documents/PP_Final_Bellman-Ford/data/grid1000x1000.graph
+GRAPH = grid1000x1000.graph
 CC = nvcc -arch=sm_75
 CFLAGS = -std=c++11
 LIBS = ../../common/graph.cpp

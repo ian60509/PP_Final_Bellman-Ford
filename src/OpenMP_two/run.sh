@@ -1,7 +1,7 @@
 SERIAL_PATH_DIR=../Serial
 SERIAL_PATH_EX=../Serial/serial
 OPENMP_PATH_EX=./openMP
-GRAPH_PATH=/HW3/graphs/grid1000x1000.graph
+GRAPH_PATH=/HW3/graphs/grid100x100.graph
 
 
 

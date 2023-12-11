@@ -101,7 +101,7 @@ int bellman_ford_MPI(Graph g){
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_processors);
     if(g->num_nodes%num_processors!=0){
-        printf("num_nodes=%d is not the multiple of number of processors=%d, that will have deadlock in MPI ", g->num_nodes, num_processors);
+        printf("num_nodes=%d is not the multiple of number of processors=%d, that will have deadlock in MPI \n", g->num_nodes, num_processors);
         exit(0);
     }
     int stride = (g->num_nodes/num_processors);

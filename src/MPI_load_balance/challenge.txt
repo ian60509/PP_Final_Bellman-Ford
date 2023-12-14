@@ -1,0 +1,32 @@
+
+
+## 不知道為甚麼 reduce 的explicit barrier 似乎沒有效果，processor 1 在 processors 0 都呼叫reduce之後才開始計算
+312555022@pp6:~/PP_Final_Bellman-Ford/src/MPI$ ./run.sh 
+./run.sh: line 1: GRAPH: command not found
+rm -f *.o
+rm -f MPI_BF
+mpicxx MPI_Bellman_Ford.cpp ../../common/graph.cpp -o MPI_BF
+-------------------start running---------------
+No protocol specified
+start Bellman-Ford
+I'm 0-th processors, final solution is....
+arr[0] = 0
+arr[1] = 11
+arr[2] = 6
+arr[3] = 12
+start Bellman-Ford
+
+## 要呼叫 all reduce 讓各個processor獲得新資料
+因為考量到個個processor間有資料依賴關係，所以如果使用 non-blocking sending 將會
+
+## load balance 問題
+因為一開始不會真實的workload ，所以無法預測每個processor 完成所需時間
+
+ Thus, for the parallelization
+of the algorithm, we need to focus on two components: (i) the partitioning of
+the graph dataset to determine the local set of vertices and (ii) ensuring the
+correctness of remote operations
+
+## Load Balance 
+如果要每次relax 都send => 次數未知無法寫master processor 的迴圈，並且overhead較高
+所以寫完再統一傳遞

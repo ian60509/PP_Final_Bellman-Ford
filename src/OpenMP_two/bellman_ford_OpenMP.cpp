@@ -11,7 +11,8 @@
 using namespace std;
 #define USE_BINARY_GRAPH 1
 #define DISTANCE_INFINITY 1000000
-
+#define NUM_THREADS 8
+#pragma GCC optimize("O3", "Ofast")
 int bellman_ford_OpenMP(Graph);
 
 int main(int argc, char** argv){
@@ -33,7 +34,6 @@ int main(int argc, char** argv){
         exit(1);
     }
     // print_graph(g);
-
     //--------------------- start running "Bellmam Ford"--------------------------
     auto start_time = std::chrono::high_resolution_clock::now();
     
@@ -47,7 +47,7 @@ int main(int argc, char** argv){
     if(exits_negative_cycle){
         printf("OMG!!! exist negative cycle!!!!!!!!!!!!!!!\n");
     }else{
-        print_distances(g, "");
+        // print_distances(g, "");
     }   
    cout << "Bellman Ford OpenMP: " << duration.count() << " microseconds" << endl;
     
@@ -60,14 +60,14 @@ Return Value = 0 : no negative cycle
 Return Value = 1 : exists negative cycle
 */
 int bellman_ford_OpenMP(Graph g){
-    
     g->distances[g->source] = 0;
     
     //--------------------------  Relax -----------------------------------
     //Iterate |V|-1 times
-    #pragma omp parallel for
+    #pragma omp parallel for //num_threads(NUM_THREADS)
     for(int i=0; i<g->num_nodes-1; i++){
-        printf("round-%d\n",i);
+        bool flag = false;
+        // printf("round-%d\n",i);
         // Relax all the Edge in this graph just one time
         // We can use amortized analysis to verify this nested for loop use O(|E|)
         // #pragma omp parallel for
@@ -81,13 +81,16 @@ int bellman_ford_OpenMP(Graph g){
                 if( g->distances[v] == DISTANCE_INFINITY) // v can't relax ant neighbor
                     break;
                 
-                    if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
-                        #pragma omp critical
-                        g-> distances[u] = g->distances[v] + g->edge_cost[edge_idx];
-                    }
+                if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
+                    #pragma omp critical
+                    g-> distances[u] = g->distances[v] + g->edge_cost[edge_idx];
+                    
+                    flag = true;
+                }
                 
             }
         }
+        if(!flag) break;
     }
     
     //---------------------  Check Negative Cycle---------------------------

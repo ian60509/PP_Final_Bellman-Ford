@@ -26,3 +26,7 @@ start Bellman-Ford
 of the algorithm, we need to focus on two components: (i) the partitioning of
 the graph dataset to determine the local set of vertices and (ii) ensuring the
 correctness of remote operations
+
+## Load Balance 
+如果要每次relax 都send => 次數未知無法寫master processor 的迴圈，並且overhead較高
+所以寫完再統一傳遞

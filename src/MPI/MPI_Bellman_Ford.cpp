@@ -8,6 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include <chrono>
+#include <algorithm>
 #include "../../common/graph.h"
 
 //顏色處理
@@ -24,6 +25,14 @@ using namespace std;
 
 
 int bellman_ford_MPI(Graph);
+int all_of_value(int* begin, int number, int predict_val){
+    for(int i=0; i<number; i++){
+        if(begin[i]!=predict_val) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 int main(int argc, char** argv) {
     //-------------------- Init MPI --------------------
@@ -45,6 +54,7 @@ int main(int argc, char** argv) {
 
         if (USE_BINARY_GRAPH) {
             g = load_graph_binary(graph_filename.c_str());
+            print_graph_metadata(g, graph_filename);
         }else {
             g = load_graph(argv[1]);
             printf("storing binary form of graph!\n");
@@ -75,7 +85,7 @@ int main(int argc, char** argv) {
     MPI_Bcast( &(g->source) , 1 , MPI_INT , 0 , MPI_COMM_WORLD);
 
     //print graph
-    if(my_rank == 1) print_graph(g);
+    // if(my_rank == 1) print_graph(g);
 
     //---------------------  Start Bellman-Ford MPI---------------------------------------
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -83,8 +93,8 @@ int main(int argc, char** argv) {
     auto end_time = std::chrono::high_resolution_clock::now();
     //---------- check result--------------
     if(my_rank==0){
-        printf("I'm %d-th processors, final solution is....\n", my_rank);
-        print_distances(g, "");
+        // printf("I'm %d-th processors, final solution is....\n", my_rank);
+        // print_distances(g, "");
     }
     
     //-----------output execution time------------------
@@ -100,21 +110,26 @@ int bellman_ford_MPI(Graph g){
     int my_rank, num_processors;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_processors);
-    if(g->num_nodes%num_processors!=0){
-        printf("num_nodes=%d is not the multiple of number of processors=%d, that will have deadlock in MPI \n", g->num_nodes, num_processors);
-        exit(0);
-    }
+    // if(g->num_nodes%num_processors!=0){
+    //     // printf("num_nodes=%d is not the multiple of number of processors=%d, that will have deadlock in MPI \n", g->num_nodes, num_processors);
+    //     exit(0);
+    // }
     int stride = (g->num_nodes/num_processors);
     int *cur_distances = (int*)malloc(sizeof(int)*g->num_nodes);
 
     g->distances[g->source] = 0;
 
     //--------------------------  Relax -----------------------------------
+    int start_v = my_rank*stride;
+    int end_v = (my_rank+1)*stride;
+    int local_change_flag[num_processors];
+    int global_change_flag[num_processors];
     //Iterate |V|-1 times
     for(int i=0; i<g->num_nodes-1; i++){
+        if(my_rank==0) printf("round=%d, num_nodes=%d\n",i , g->num_nodes);
 
-        int start_v = my_rank*stride;
-        int end_v = (my_rank+1)*stride;
+        
+        memset(local_change_flag, 0, sizeof(int)*num_processors);
 
         //Each processor is responsible for handling a subset of nodes
         for(int v=start_v; v<end_v; v++){
@@ -128,6 +143,7 @@ int bellman_ford_MPI(Graph g){
                     break;
                 if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
                    g-> distances[u] = g->distances[v] + g->edge_cost[edge_idx];
+                   local_change_flag[my_rank] = 1;
                 }
             }
         }
@@ -136,6 +152,10 @@ int bellman_ford_MPI(Graph g){
 
         MPI_Allreduce(g->distances, cur_distances, g->num_nodes, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
         memcpy(g->distances, cur_distances, g->num_nodes*sizeof(int));
+
+        // Judge whether all distances are not update
+        MPI_Allreduce(local_change_flag, global_change_flag, num_processors, MPI_INT, MPI_MAX, MPI_COMM_WORLD); //MAX
+        if(all_of_value(global_change_flag, num_processors, 0) == 1) break;
     }
     
     //---------------------  Check Negative Cycle---------------------------

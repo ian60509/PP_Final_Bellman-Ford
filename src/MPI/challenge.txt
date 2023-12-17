@@ -17,3 +17,12 @@ arr[3] = 12
 start Bellman-Ford
 
 ## 要呼叫 all reduce 讓各個processor獲得新資料
+因為考量到個個processor間有資料依賴關係，所以如果使用 non-blocking sending 將會
+
+## load balance 問題
+因為一開始不會真實的workload ，所以無法預測每個processor 完成所需時間
+
+ Thus, for the parallelization
+of the algorithm, we need to focus on two components: (i) the partitioning of
+the graph dataset to determine the local set of vertices and (ii) ensuring the
+correctness of remote operations

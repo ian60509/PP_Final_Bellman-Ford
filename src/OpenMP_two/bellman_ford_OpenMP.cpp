@@ -64,13 +64,13 @@ int bellman_ford_OpenMP(Graph g){
     
     //--------------------------  Relax -----------------------------------
     //Iterate |V|-1 times
-    #pragma omp parallel for //num_threads(NUM_THREADS)
+    #pragma omp parallel for num_threads(NUM_THREADS)
     for(int i=0; i<g->num_nodes-1; i++){
         bool flag = false;
         // printf("round-%d\n",i);
         // Relax all the Edge in this graph just one time
         // We can use amortized analysis to verify this nested for loop use O(|E|)
-        // #pragma omp parallel for
+        #pragma omp parallel for
         for(int v=0; v<g->num_nodes; v++){
             int start_edge = g->outgoing_starts[v];
             int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
@@ -82,7 +82,7 @@ int bellman_ford_OpenMP(Graph g){
                     break;
                 
                 if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
-                    #pragma omp critical
+                    #pragma omp atomic write
                     g-> distances[u] = g->distances[v] + g->edge_cost[edge_idx];
                     
                     flag = true;

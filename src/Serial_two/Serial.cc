@@ -49,8 +49,7 @@ int main(int argc, char** argv){
     }else{
         print_distances(g, "");
     }   
-   cout << "Bellman Ford Serial: " << duration.count() << " microseconds" << endl;
-    
+    cout << "Bellman Ford Serial: " << duration.count() << " microseconds" << endl;
 
     return 0;
 }
@@ -66,7 +65,7 @@ int bellman_ford_serial(Graph g){
     //--------------------------  Relax -----------------------------------
     //Iterate |V|-1 times
     for(int i=0; i<g->num_nodes-1; i++){
-
+        bool flag = false;
         // Relax all the Edge in this graph just one time
         // We can use amortized analysis to verify this nested for loop use O(|E|)
         for(int v=0; v<g->num_nodes; v++){
@@ -80,26 +79,29 @@ int bellman_ford_serial(Graph g){
                     break;
                 if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
                    g-> distances[u] = g->distances[v] + g->edge_cost[edge_idx];
+                    flag = true;
                 }
             }
+            
         }
+        if(!flag) break;
     }
     
     //---------------------  Check Negative Cycle---------------------------
     for(int v=0; v<g->num_nodes; v++){
-            int start_edge = g->outgoing_starts[v];
-            int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
+        int start_edge = g->outgoing_starts[v];
+        int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
 
-            //for each u, which is outgoing neighbor of v
-            for(int edge_idx = start_edge; edge_idx < end_edge; edge_idx++){
-                Vertex u = g->outgoing_edges[edge_idx];
-                if( g->distances[v] == DISTANCE_INFINITY) // v can't relax ant neighbor
-                    break;
-                if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
-                   return 1;
-                }
+        //for each u, which is outgoing neighbor of v
+        for(int edge_idx = start_edge; edge_idx < end_edge; edge_idx++){
+            Vertex u = g->outgoing_edges[edge_idx];
+            if( g->distances[v] == DISTANCE_INFINITY) // v can't relax ant neighbor
+                break;
+            if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
+                return 1;
             }
         }
+    }
     return 0;
 
 }

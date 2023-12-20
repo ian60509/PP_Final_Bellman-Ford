@@ -12,7 +12,7 @@ using namespace std;
 #define USE_BINARY_GRAPH 1
 #define DISTANCE_INFINITY 1000000
 #define NUM_THREADS 8
-#pragma GCC optimize("O3", "Ofast")
+// #pragma GCC optimize("O3", "Ofast")
 int bellman_ford_OpenMP(Graph);
 
 int main(int argc, char** argv){
@@ -35,6 +35,9 @@ int main(int argc, char** argv){
     }
     // print_graph(g);
     //--------------------- start running "Bellmam Ford"--------------------------
+    
+    omp_set_num_threads(NUM_THREADS);
+    
     auto start_time = std::chrono::high_resolution_clock::now();
     
     int exits_negative_cycle = bellman_ford_OpenMP(g);
@@ -61,17 +64,17 @@ Return Value = 1 : exists negative cycle
 */
 int bellman_ford_OpenMP(Graph g){
     g->distances[g->source] = 0;
-    
     //--------------------------  Relax -----------------------------------
     //Iterate |V|-1 times
-    #pragma omp parallel for num_threads(NUM_THREADS)
-    for(int i=0; i<g->num_nodes-1; i++){
+    // #pragma omp parallel for num_threads(NUM_THREADS)
+    for(int i=0; i< g->num_nodes-1; i++){
         bool flag = false;
         // printf("round-%d\n",i);
         // Relax all the Edge in this graph just one time
         // We can use amortized analysis to verify this nested for loop use O(|E|)
-        #pragma omp parallel for
-        for(int v=0; v<g->num_nodes; v++){
+        #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic, 5120) private(i) //reduction(+:f)
+        for(int v=0; v< g->num_nodes; v++){
+            // cout << omp_get_num_threads() << endl;
             int start_edge = g->outgoing_starts[v];
             int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
 
@@ -94,21 +97,22 @@ int bellman_ford_OpenMP(Graph g){
     }
     
     //---------------------  Check Negative Cycle---------------------------
-    #pragma omp parallel for
-    for(int v=0; v<g->num_nodes; v++){
-            int start_edge = g->outgoing_starts[v];
-            int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
+    int r = 0;
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic, 5120)
+    for(int v=0; v< g->num_nodes; v++){
+        int start_edge = g->outgoing_starts[v];
+        int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
 
-            //for each u, which is outgoing neighbor of v
-            for(int edge_idx = start_edge; edge_idx < end_edge; edge_idx++){
-                Vertex u = g->outgoing_edges[edge_idx];
-                if( g->distances[v] == DISTANCE_INFINITY) // v can't relax ant neighbor
-                    break;
-                if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
-                   return 1;
-                }
+        //for each u, which is outgoing neighbor of v
+        for(int edge_idx = start_edge; edge_idx < end_edge; edge_idx++){
+            Vertex u = g->outgoing_edges[edge_idx];
+            if( g->distances[v] == DISTANCE_INFINITY) // v can't relax ant neighbor
+                break;
+            if(g->distances[v] + g->edge_cost[edge_idx] < g->distances[u] ){
+                r = 1;
             }
         }
-    return 0;
+    }
+    return r;
 
 }

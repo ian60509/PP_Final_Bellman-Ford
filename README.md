@@ -54,14 +54,14 @@ make...
 ## CUDA part
 編譯:
 ```
-cd...
+cd /src/Serial
 make clean
-make...
+make
 ```
 
 執行:
 ```
-./example -a ....
+./bellman_ford_cuda <graph path>
 ```
 ## 實驗結果
 

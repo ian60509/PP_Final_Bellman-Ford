@@ -13,79 +13,44 @@ PP工作站....
 * 
 
 ## Serial-part
-編譯:
+編譯 + 執行:
 ```
 cd /src/Serial
 make clean
-make
+make run
 ```
 
-執行:
-```
-./serial.out  {graph路徑}
-```
 
 ## MPI-part
-編譯:
+編譯+執行:
 ```
-cd...
-make clean
-make...
+cd ./src/MPI
+run.sh
 ```
 
-執行:
-```
-./example -a ....
-```
 
 ## OpenMP-part
-編譯:
+編譯+執行:
 ```
-cd...
-make clean
-make...
-```
-
-執行:
-```
-./example -a ....
+cd ./src/MPI
+./shell.sh
 ```
 
 ## CUDA part
 編譯:
 ```
-cd...
+cd ./src/CUDA
 make clean
-make...
+make all
 ```
 
-執行:
+編譯+執行:
 ```
-./example -a ....
-```
-## 實驗結果
-
-## PR 程序
-1. fork
-2. clone自己的fork repo
-3. 開始胡搞瞎搞 => commit => push上自己的fork repo
-4. 發Pull Request 給原repo
-5. 原repo管理者(ian60509)同意，處理conflict merge
-
-### 取得最新的「原repo」進度
-```
-git remote -v
+cd ./src/CUDA
+make clean
+make run
 ```
 
-將原repo設定為upstream 節點
-```
-git remote add upstream https://github.com/ian60509/PP_Final_Bellman-Ford.git
-git remote -v
-```
-
-```
-git fetch upstream
-git merge upstream/master
 
 ```
 

@@ -9,8 +9,10 @@ PP工作站....
 ## 目錄結構說明:
 * src: 程式碼
 * data: 測資
-* include: 需要引用的函式，例如
-* 
+* include: 需要引用的函式
+* common: helper function
+* tools: 生圖工具
+* result: 實驗結果
 
 ## Serial-part
 編譯 + 執行:

@@ -40,18 +40,21 @@ cd ./src/MPI
 ## CUDA part
 編譯:
 ```
+cd /src/Serial
+make clean
+make
+```
+
+執行:
+```
+./bellman_ford_cuda <graph path>
+=======
 cd ./src/CUDA
 make clean
 make all
-```
 
-編譯+執行:
-```
-cd ./src/CUDA
-make clean
-make run
 ```
 
 
-```
+
 

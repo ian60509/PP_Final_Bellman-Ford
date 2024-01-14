@@ -59,9 +59,11 @@ int main(int argc, char** argv){
         exit(1);
     }
     // print_graph(g);
-
     omp_set_num_threads(NUM_THREADS);
     //--------------------- start running "Bellmam Ford"--------------------------
+    
+    omp_set_num_threads(NUM_THREADS);
+    
     auto start_time = std::chrono::high_resolution_clock::now();
     padding_distances(g);
     
@@ -75,7 +77,7 @@ int main(int argc, char** argv){
     if(exits_negative_cycle){
         printf("OMG!!! exist negative cycle!!!!!!!!!!!!!!!\n");
     }else{
-        // print_distances(g, "", PAD_SIZE);
+
     }   
    cout << "Bellman Ford OpenMP: " << duration.count() << " microseconds" << endl;
     
@@ -88,6 +90,7 @@ Return Value = 0 : no negative cycle
 Return Value = 1 : exists negative cycle
 */
 int bellman_ford_OpenMP(Graph g){
+
     g->distances[g->source * PAD_SIZE] = 0;
     
     //--------------------------  Relax -----------------------------------
@@ -98,6 +101,7 @@ int bellman_ford_OpenMP(Graph g){
         // printf("round-%d\n",i);
         // Relax all the Edge in this graph just one time
         // We can use amortized analysis to verify this nested for loop use O(|E|)
+
         #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic, 5120) private(i)
         for(int v=0; v<g->num_nodes; v++){
             int start_edge = g->outgoing_starts[v];

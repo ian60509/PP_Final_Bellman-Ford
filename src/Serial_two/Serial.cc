@@ -32,7 +32,7 @@ int main(int argc, char** argv){
         free_graph(g);
         exit(1);
     }
-    print_graph(g);
+    // print_graph(g);
 
     //--------------------- start running "Bellmam Ford"--------------------------
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -47,9 +47,10 @@ int main(int argc, char** argv){
     if(exits_negative_cycle){
         printf("OMG!!! exist negative cycle!!!!!!!!!!!!!!!\n");
     }else{
-        print_distances(g, "");
+        // print_distances(g, "");
     }   
     cout << "Bellman Ford Serial: " << duration.count() << " microseconds" << endl;
+
 
     return 0;
 }

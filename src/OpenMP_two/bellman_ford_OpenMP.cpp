@@ -13,7 +13,7 @@ using namespace std;
 #define DISTANCE_INFINITY 1000000
 #define NUM_THREADS 8
 #define PAD_SIZE 16 //我的本地端cache line size = 64 Byte，要做int的padding故16個
-#pragma GCC optimize("O3", "Ofast")
+// #pragma GCC optimize("O3", "Ofast")
 int bellman_ford_OpenMP(Graph);
 
 void set_distances_value(graph* g, int length, int value){
@@ -60,10 +60,11 @@ int main(int argc, char** argv){
     }
     // print_graph(g);
 
-    
+    omp_set_num_threads(NUM_THREADS);
     //--------------------- start running "Bellmam Ford"--------------------------
     auto start_time = std::chrono::high_resolution_clock::now();
     padding_distances(g);
+    
     int exits_negative_cycle = bellman_ford_OpenMP(g);
 
     auto end_time = std::chrono::high_resolution_clock::now();
@@ -91,13 +92,13 @@ int bellman_ford_OpenMP(Graph g){
     
     //--------------------------  Relax -----------------------------------
     //Iterate |V|-1 times
-    #pragma omp parallel for //num_threads(NUM_THREADS)
+    // #pragma omp parallel for //num_threads(NUM_THREADS)
     for(int i=0; i<g->num_nodes-1; i++){
         bool flag = false;
         // printf("round-%d\n",i);
         // Relax all the Edge in this graph just one time
         // We can use amortized analysis to verify this nested for loop use O(|E|)
-        // #pragma omp parallel for
+        #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic, 5120) private(i)
         for(int v=0; v<g->num_nodes; v++){
             int start_edge = g->outgoing_starts[v];
             int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
@@ -109,7 +110,7 @@ int bellman_ford_OpenMP(Graph g){
                     break;
                 
                 if(g->distances[v * PAD_SIZE] + g->edge_cost[edge_idx] < g->distances[u * PAD_SIZE] ){
-                    #pragma omp critical
+                    #pragma omp atomic write
                     g-> distances[u * PAD_SIZE] = g->distances[v * PAD_SIZE] + g->edge_cost[edge_idx];
                     
                     flag = true;
@@ -121,7 +122,8 @@ int bellman_ford_OpenMP(Graph g){
     }
     
     //---------------------  Check Negative Cycle---------------------------
-    #pragma omp parallel for
+    int r = 0;
+    #pragma omp parallel for num_threads(NUM_THREADS) schedule(dynamic, 5120)
     for(int v=0; v<g->num_nodes; v++){
             int start_edge = g->outgoing_starts[v];
             int end_edge = (v == g->num_nodes - 1)? g->num_edges: g->outgoing_starts[v + 1];
@@ -132,10 +134,10 @@ int bellman_ford_OpenMP(Graph g){
                 if( g->distances[v * PAD_SIZE] == DISTANCE_INFINITY) // v can't relax ant neighbor
                     break;
                 if(g->distances[v * PAD_SIZE] + g->edge_cost[edge_idx] < g->distances[u * PAD_SIZE] ){
-                   return 1;
+                   r = 1;
                 }
             }
         }
-    return 0;
+    return r;
 
 }
